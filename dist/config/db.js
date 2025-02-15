@@ -9,7 +9,7 @@ dotenv_1.default.config();
 const mongoURI = process.env.MONGODB_URI;
 const connectDB = async () => {
     try {
-        await mongoose_1.default.connect(mongoURI, { dbName: "wafina" });
+        await mongoose_1.default.connect(mongoURI);
         console.log("MongoDB Connected!");
     }
     catch (err) {
