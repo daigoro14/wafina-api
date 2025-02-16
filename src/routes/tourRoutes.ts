@@ -54,8 +54,23 @@ router.get("/", authenticateJWT, authorizeRoles(["admin", "superAdmin"]), async 
       query.date = { ...query.date, $lte: req.query.latest }; 
     }
 
-    const tours = await Tour.find(query).sort({ date: 1 });
-    res.json(tours);
+    if (req.query.search) {
+        const searchRegex = new RegExp(req.query.search as string, "i");
+        query.$or = [
+          { attractions: searchRegex },
+          { description: searchRegex },
+          { time: searchRegex },
+        ];
+    }
+    
+        const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await Tour.countDocuments(query);
+    const tours = await Tour.find(query).sort({ date: 1 }).skip(skip).limit(limit);
+
+    res.json({tours, total});
   } catch (error) {
     res.status(500).json({ error: "Server error", details: error });
   }
